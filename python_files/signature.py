@@ -1,6 +1,6 @@
-import gradients
+import hog
 # import hoc here
-import hack3 as hoc
+import hoc
 from skimage import data
 import cv2
 
@@ -17,11 +17,11 @@ def main():
 
 		im = cv2.imread(list_of_files[i], 1)
 
-		image, image_s = gradients.preprocess(im)
+		image, image_s = hog.preprocess(im)
 		
-		magnitude, orientation = gradients.find_gradients(image, image_s)
-		bins_mat = gradients.bins_in_cells(magnitude, orientation)
-		fd_hog = gradients.normalise_and_fd(bins_mat)
+		magnitude, orientation = hog.find_gradients(image, image_s)
+		bins_mat = hog.bins_in_cells(magnitude, orientation)
+		fd_hog = hog.normalise_and_fd(bins_mat)
 
 		print("after hog")
 
