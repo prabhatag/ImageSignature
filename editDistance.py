@@ -1,4 +1,6 @@
 import os
+import numpy as np
+from sklearn.decomposition import PCA
 
 def getIndex(arr_score,val):
 	for i in arr_score:
@@ -17,6 +19,7 @@ def getAllSignatures(fileName):
 		sig.append(list(map(float,line[1:-2].split(","))))
 	return sig
 
+#Euclidean distance
 def distanceMatrix(sig):
 	all_sig_dist = []
 	for i in range(len(sig)):
@@ -31,22 +34,46 @@ def distanceMatrix(sig):
 
 	return all_sig_dist
 
+'''
+#Chi Square
+def distanceMatrix(sig,eps = 1e-10):
+	all_sig_dist = []
+	for i in range(len(sig)):
+		dist = []
+		for j in range(len(sig)):
+			if not i==j:
+				d = 0.5 * np.sum([((a - b) ** 2) / (a + b + eps) for (a, b) in zip(sig[i], sig[j])])
+				dist.append((j,d))
+		all_sig_dist.append(dist)
+
+	return all_sig_dist
+'''
+
 def getMinMaxSimilarity(sig):
 	min_max_sim = []
 	all_sig_dist = distanceMatrix(sig)
 	for i in range(len(all_sig_dist)):
 		maxIndex = getIndex(all_sig_dist[i],max(x[1] for x in all_sig_dist[i]))
 		minIndex = getIndex(all_sig_dist[i],min(x[1] for x in all_sig_dist[i]))
-		print("maxindex",maxIndex)
-		print("minindex",minIndex)
+		# print("maxindex",maxIndex)
+		# print("minindex",minIndex)
 		min_max_sim.append((getImgName(i),getImgName(minIndex),min(x[1] for x in all_sig_dist[i]),getImgName(maxIndex),max(x[1] for x in all_sig_dist[i])))
 	return min_max_sim
 
-sig_arr = getAllSignatures("signatures.txt")
-similarityScore = getMinMaxSimilarity(sig_arr)
+sig_arr = getAllSignatures("signatures_normalized.txt")
+
+#apply PCA
+pca = PCA(.95) #decide confidence level
+sig_arr_pca = pca.fit_transform(sig_arr)
+
+print("Original length : ",len(sig_arr[0]))
+print("After PCA length : ",len(sig_arr_pca[0]))
+
+similarityScore = getMinMaxSimilarity(sig_arr_pca)
 print("Image\tMostSimilar\tMinDistance\tLeastSimilar\tMaxDist")
 for i in similarityScore:
-	print(i[0],i[1],i[2],i[3],i[4],sep="\t")
+	print("\"",i[0],"\":[",end="",sep="")
+	print("\"",i[1],"\",","\"",i[2],"\",","\"",i[3],"\",","\"",i[4],"\"],",sep="")
 
 # all_sig_dist = []
 # min_max_sim = []
